@@ -13,6 +13,13 @@ ToDo app desktop version.
 
 ---
 
+## Supported:
+
+- Linux: All.
+- Windows: 7/8/10/11?.
+
+***
+
 ## Help:
 
 - Clone project
@@ -27,6 +34,8 @@ ToDo app desktop version.
 - `sudo ln -s /usr/lib/libmpv.so /usr/lib/libmpv.so.1`
 
 ---
+
+![LOGO](https://github.com/smartlegionlab/todo_app_desktop/raw/master/data/images/todo_app_desktop.png)
 
 ***
 
