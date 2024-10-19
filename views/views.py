@@ -13,7 +13,6 @@ class TaskView(ft.Column):
     def __init__(self, task, on_status_change, on_delete, on_edit):
         super().__init__()
         self.task = task
-        print(self.task.__dict__)
         self.on_status_change = on_status_change
         self.on_delete = on_delete
         self.on_edit = on_edit

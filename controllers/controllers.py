@@ -23,7 +23,7 @@ class TodoApp(ft.Column):
 
         self.controls = [
             ft.Row(
-                [ft.Text(value="Your ToDo List", theme_style=ft.TextThemeStyle.HEADLINE_MEDIUM)],
+                [ft.Text(value="Todos", theme_style=ft.TextThemeStyle.HEADLINE_MEDIUM)],
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             ft.Row(
