@@ -11,7 +11,7 @@ from controllers.controllers import TodoApp
 
 
 def main(page: ft.Page):
-    page.title = "Smart ToDo App"
+    page.title = "Smart ToDo App. Copyright © 2024, A.A. Suvorov; All rights reserved."
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.scroll = ft.ScrollMode.ADAPTIVE
     todo_app = TodoApp()

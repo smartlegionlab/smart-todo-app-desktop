@@ -1,4 +1,4 @@
-# ToDO App (Desktop version)
+# Smart ToDo app (Desktop version)
 
 ---
 
@@ -6,7 +6,7 @@ ToDo app desktop version.
 
 ---
 
-## Other to-do list apps:
+## Other ToDO apps:
 
 - [Telegram Bot ToDo app](https://github.com/smartlegionlab/todo_app_tg_bot)
 - [Cli ToDo app](https://github.com/smartlegionlab/todo_app_cli) 
