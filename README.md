@@ -6,10 +6,11 @@ ToDo app desktop version.
 
 ---
 
-## Other ToDO apps:
+## Other ToDo apps:
 
 - [Telegram Bot ToDo app](https://github.com/smartlegionlab/todo_app_tg_bot)
-- [Cli ToDo app](https://github.com/smartlegionlab/todo_app_cli) 
+- [Cli ToDo app](https://github.com/smartlegionlab/todo_app_cli)
+- [Web ToDo app](https://github.com/smartlegionlab/todo_app_web_django)
 
 ---
 
