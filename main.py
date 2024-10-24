@@ -7,7 +7,7 @@
 # https://github.com/smartlegionlab/
 # --------------------------------------------------------
 import flet as ft
-from controllers.controllers import TodoApp
+from core.controllers import TodoApp
 
 
 def main(page: ft.Page):

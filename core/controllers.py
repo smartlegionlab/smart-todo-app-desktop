@@ -7,9 +7,9 @@
 # https://github.com/smartlegionlab/
 # --------------------------------------------------------
 import flet as ft
-from db.db import Database
-from models.models import Task
-from views.views import TaskView
+from core.db import Database
+from core.models import Task
+from core.views import TaskView
 
 
 class TodoApp(ft.Column):
@@ -23,7 +23,7 @@ class TodoApp(ft.Column):
 
         self.controls = [
             ft.Row(
-                [ft.Text(value="Todos", theme_style=ft.TextThemeStyle.HEADLINE_MEDIUM)],
+                [ft.Text(value="Todo List", theme_style=ft.TextThemeStyle.HEADLINE_MEDIUM)],
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             ft.Row(
