@@ -115,4 +115,4 @@ class TodoApp(ft.Column):
             )
             if not task_view.task.completed:
                 count += 1
-        self.items_left.value = f"{count} active item(s) left"
+        self.items_left.value = f"{count} active task(s) left"
