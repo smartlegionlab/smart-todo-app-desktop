@@ -1,23 +1,23 @@
-# Smart ToDo app (Desktop version)
+# Smart Todo App (Desktop version) <sup>v0.2.3</sup>
 
 ---
 
-ToDo app desktop version.
+TODO app desktop version.
 
 ---
 
 ## Other ToDo apps:
 
-- [Telegram Bot ToDo app](https://github.com/smartlegionlab/todo_app_tg_bot)
-- [Cli ToDo app](https://github.com/smartlegionlab/todo_app_cli)
-- [Web ToDo app](https://github.com/smartlegionlab/todo_app_web_django)
+- [Telegram Bot ToDo app](https://github.com/smartlegionlab/todo-app-tg-bot)
+- [Cli ToDo app](https://github.com/smartlegionlab/todo-app-cli)
+- [Web ToDo app](https://github.com/smartlegionlab/todo-app-django)
 
 ---
 
 ## Supported:
 
-- Linux: All.
-- Windows: 7/8/10/11?.
+- Linux: All
+- Windows: All
 
 ***
 
@@ -36,7 +36,7 @@ ToDo app desktop version.
 
 ---
 
-![LOGO](https://github.com/smartlegionlab/todo_app_desktop/raw/master/data/images/todo_app_desktop.png)
+![LOGO](https://github.com/smartlegionlab/smart-todo-app-desktop/raw/master/data/images/todo_app_desktop.png)
 
 ***
 
@@ -55,7 +55,7 @@ ToDo app desktop version.
 
     Licensed under the terms of the BSD 3-Clause License
     (see LICENSE for details).
-    Copyright © 2018-2024, A.A. Suvorov
+    Copyright © 2018-2025, A.A. Suvorov
     All rights reserved.
 
 
