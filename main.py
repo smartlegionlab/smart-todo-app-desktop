@@ -1,7 +1,7 @@
 # --------------------------------------------------------
 # Licensed under the terms of the BSD 3-Clause License
 # (see LICENSE for details).
-# Copyright © 2024-2025, A.A. Suvorov
+# Copyright © 2024-2025, Alexander Suvorov
 # All rights reserved.
 # --------------------------------------------------------
 # https://github.com/smartlegionlab/
@@ -11,7 +11,7 @@ from core.controllers import TodoApp
 
 
 def main(page: ft.Page):
-    page.title = "Smart Todo App. Copyright © 2024-2025, A.A. Suvorov; All rights reserved."
+    page.title = "Smart Todo App. Copyright © 2024-2025, Alexander Suvorov; All rights reserved."
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.scroll = ft.ScrollMode.ADAPTIVE
     todo_app = TodoApp()
