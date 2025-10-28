@@ -14,6 +14,7 @@ def main(page: ft.Page):
     page.title = "Smart Todo App. Copyright © 2024-2025, Alexander Suvorov; All rights reserved."
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.scroll = ft.ScrollMode.ADAPTIVE
+    page.theme_mode = ft.ThemeMode.DARK
     todo_app = TodoApp()
     page.add(todo_app)
     todo_app.load_tasks()
