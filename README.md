@@ -1,4 +1,4 @@
-# Smart Todo App (Desktop version) <sup>v1.0.1</sup>
+# Smart Todo App (Desktop version) <sup>v1.1.0</sup>
 
 ---
 

@@ -54,12 +54,13 @@ class TodoApp(ft.Column):
             scrollable=False,
             selected_index=0,
             on_change=self.tabs_changed,
-            tabs=[ft.Tab(text="all"), ft.Tab(text="active"), ft.Tab(text="completed")],
+            tabs=[ft.Tab(text="active"), ft.Tab(text="all"), ft.Tab(text="completed")],
         )
 
     def load_tasks(self):
         self.tasks.controls.clear()
-        for row in self.db.get_all_tasks():
+        tasks_data = self.db.get_all_tasks()
+        for row in tasks_data:
             task_uuid, task_name, completed, created_date, sort_order = row
             completed = bool(completed)
             task = Task(task_uuid, task_name, completed, created_date, sort_order)
@@ -89,13 +90,14 @@ class TodoApp(ft.Column):
         self.update()
 
     def task_delete(self, task):
-        for task_view in self.tasks.controls:
+        for task_view in self.tasks.controls[:]:
             if task_view.task.uuid == task.uuid:
                 self.db.delete_task(task.uuid)
                 self.db.reorder_tasks()
                 self.tasks.controls.remove(task_view)
-                self.update()
+                self.load_tasks()
                 break
+        self.update()
 
     def task_edit(self, task_view, new_name):
         self.db.update_task(task_view.task.uuid, new_name, task_view.task.completed)
@@ -138,19 +140,22 @@ class TodoApp(ft.Column):
         self.update()
 
     def clear_clicked(self, e):
-        for task_view in self.tasks.controls[:]:
-            if task_view.task.completed:
-                self.task_delete(task_view.task)
+        completed_tasks = [task_view for task_view in self.tasks.controls[:] if task_view.task.completed]
+        for task_view in completed_tasks:
+            self.task_delete(task_view.task)
 
     def before_update(self):
         status = self.filter.tabs[self.filter.selected_index].text
         count = 0
         for task_view in self.tasks.controls:
-            task_view.visible = (
-                    status == "all"
-                    or (status == "active" and not task_view.task.completed)
-                    or (status == "completed" and task_view.task.completed)
-            )
+            if status == "all":
+                task_view.visible = True
+            elif status == "active":
+                task_view.visible = not task_view.task.completed
+            elif status == "completed":
+                task_view.visible = task_view.task.completed
+
             if not task_view.task.completed:
                 count += 1
+
         self.items_left.value = f"{count} active task(s) left"
