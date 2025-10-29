@@ -60,9 +60,9 @@ class TodoApp(ft.Column):
     def load_tasks(self):
         self.tasks.controls.clear()
         for row in self.db.get_all_tasks():
-            task_uuid, task_name, completed = row
+            task_uuid, task_name, completed, created_date = row
             completed = bool(completed)
-            task = Task(task_uuid, task_name, completed)
+            task = Task(task_uuid, task_name, completed, created_date)
             task_view = TaskView(task, self.task_status_change, self.task_delete, self.task_edit)
             self.tasks.controls.append(task_view)
         self.update()
@@ -93,7 +93,7 @@ class TodoApp(ft.Column):
     def task_edit(self, task_view, new_name):
         self.db.update_task(task_view.task.uuid, new_name, task_view.task.completed)
         task_view.task.name = new_name
-        task_view.display_task.label = new_name
+        task_view.task_text.value = new_name
         self.update()
 
     def tabs_changed(self, e):

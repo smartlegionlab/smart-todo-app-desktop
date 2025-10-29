@@ -7,6 +7,7 @@
 # https://github.com/smartlegionlab/
 # --------------------------------------------------------
 import sqlite3
+from datetime import datetime
 
 
 class Database:
@@ -21,14 +22,16 @@ class Database:
                 id INTEGER PRIMARY KEY,
                 uuid TEXT NOT NULL UNIQUE,
                 name TEXT NOT NULL,
-                completed BOOLEAN NOT NULL
+                completed BOOLEAN NOT NULL,
+                created_date TEXT NOT NULL
             )
         ''')
         self.conn.commit()
 
     def add_task(self, uuid, name):
-        self.cursor.execute('INSERT INTO tasks (uuid, name, completed) VALUES (?, ?, ?)',
-                            (uuid, name, False))
+        created_date = datetime.now().isoformat()
+        self.cursor.execute('INSERT INTO tasks (uuid, name, completed, created_date) VALUES (?, ?, ?, ?)',
+                            (uuid, name, False, created_date))
         self.conn.commit()
 
     def update_task(self, uuid, name, completed):
@@ -41,7 +44,7 @@ class Database:
         self.conn.commit()
 
     def get_all_tasks(self):
-        self.cursor.execute('SELECT uuid, name, completed FROM tasks')
+        self.cursor.execute('SELECT uuid, name, completed, created_date FROM tasks')
         return self.cursor.fetchall()
 
     def close(self):

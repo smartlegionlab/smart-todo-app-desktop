@@ -7,6 +7,7 @@
 # https://github.com/smartlegionlab/
 # --------------------------------------------------------
 import flet as ft
+from datetime import datetime
 
 
 class TaskView(ft.Column):
@@ -17,10 +18,21 @@ class TaskView(ft.Column):
         self.on_delete = on_delete
         self.on_edit = on_edit
 
-        self.display_task = ft.Checkbox(
-            value=self.task.completed, label=self.task.name, on_change=self.status_changed
-        )
+        self.task_checkbox = ft.Checkbox(value=self.task.completed, on_change=self.status_changed)
+        self.task_text = ft.Text(value=self.task.name, no_wrap=False)
+
         self.edit_name = ft.TextField(expand=1, value=self.task.name)
+
+        if isinstance(self.task.created_date, str):
+            created_date = datetime.fromisoformat(self.task.created_date)
+        else:
+            created_date = self.task.created_date
+
+        self.created_date_text = ft.Text(
+            value=f"Created: {created_date.strftime('%Y-%m-%d %H:%M')}",
+            size=12,
+            color=ft.colors.GREY_500
+        )
 
         self.display_view = self.create_display_view()
         self.edit_view = self.create_edit_view()
@@ -28,34 +40,59 @@ class TaskView(ft.Column):
         self.controls = [self.display_view, self.edit_view]
 
     def create_display_view(self):
-        return ft.Row(
-            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        return ft.Column(
             controls=[
-                self.display_task,
                 ft.Row(
-                    spacing=0,
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    vertical_alignment=ft.CrossAxisAlignment.START,
                     controls=[
-                        ft.IconButton(icon=ft.icons.CREATE_OUTLINED, tooltip="Edit", on_click=self.edit_clicked),
-                        ft.IconButton(icon=ft.icons.DELETE_OUTLINE, tooltip="Delete", on_click=self.delete_clicked),
+                        ft.Row(
+                            controls=[
+                                self.task_checkbox,
+                                self.task_text,
+                            ],
+                            expand=True,
+                            wrap=True,
+                        ),
+                        ft.Row(
+                            spacing=0,
+                            controls=[
+                                ft.IconButton(icon=ft.icons.CREATE_OUTLINED, tooltip="Edit",
+                                              on_click=self.edit_clicked),
+                                ft.IconButton(icon=ft.icons.DELETE_OUTLINE, tooltip="Delete",
+                                              on_click=self.delete_clicked),
+                            ],
+                        ),
                     ],
                 ),
-            ],
+                ft.Container(
+                    content=self.created_date_text,
+                    padding=ft.padding.only(left=40)
+                )
+            ]
         )
 
     def create_edit_view(self):
-        return ft.Row(
+        return ft.Column(
             visible=False,
-            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
             controls=[
-                self.edit_name,
-                ft.IconButton(
-                    icon=ft.icons.DONE_OUTLINE_OUTLINED,
-                    icon_color=ft.colors.GREEN,
-                    tooltip="Update",
-                    on_click=self.save_clicked
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    controls=[
+                        self.edit_name,
+                        ft.IconButton(
+                            icon=ft.icons.DONE_OUTLINE_OUTLINED,
+                            icon_color=ft.colors.GREEN,
+                            tooltip="Update",
+                            on_click=self.save_clicked
+                        ),
+                    ],
                 ),
+                ft.Container(
+                    content=self.created_date_text,
+                    padding=ft.padding.only(left=40)
+                )
             ],
         )
 
@@ -71,7 +108,7 @@ class TaskView(ft.Column):
         self.update()
 
     def status_changed(self, e):
-        self.task.completed = self.display_task.value
+        self.task.completed = self.task_checkbox.value
         self.on_status_change(self.task)
 
     def delete_clicked(self, e):

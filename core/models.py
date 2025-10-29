@@ -6,11 +6,13 @@
 # --------------------------------------------------------
 # https://github.com/smartlegionlab/
 # --------------------------------------------------------
+import datetime
 import uuid
 
 
 class Task:
-    def __init__(self, task_uuid=None, task_name="", completed=False):
+    def __init__(self, task_uuid=None, task_name="", completed=False, created_date=None):
         self.uuid = task_uuid or str(uuid.uuid4())
         self.name = task_name
         self.completed = completed
+        self.created_date = created_date or datetime.datetime.now()
