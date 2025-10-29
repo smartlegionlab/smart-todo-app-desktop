@@ -11,12 +11,14 @@ from datetime import datetime
 
 
 class TaskView(ft.Column):
-    def __init__(self, task, on_status_change, on_delete, on_edit):
+    def __init__(self, task, on_status_change, on_delete, on_edit, on_move_up, on_move_down):
         super().__init__()
         self.task = task
         self.on_status_change = on_status_change
         self.on_delete = on_delete
         self.on_edit = on_edit
+        self.on_move_up = on_move_up
+        self.on_move_down = on_move_down
 
         self.task_checkbox = ft.Checkbox(value=self.task.completed, on_change=self.status_changed)
         self.task_text = ft.Text(value=self.task.name, no_wrap=False)
@@ -57,10 +59,28 @@ class TaskView(ft.Column):
                         ft.Row(
                             spacing=0,
                             controls=[
-                                ft.IconButton(icon=ft.icons.CREATE_OUTLINED, tooltip="Edit",
-                                              on_click=self.edit_clicked),
-                                ft.IconButton(icon=ft.icons.DELETE_OUTLINE, tooltip="Delete",
-                                              on_click=self.delete_clicked),
+                                ft.IconButton(
+                                    icon=ft.icons.ARROW_UPWARD,
+                                    tooltip="Move up",
+                                    on_click=self.move_up_clicked,
+                                    icon_size=16
+                                ),
+                                ft.IconButton(
+                                    icon=ft.icons.ARROW_DOWNWARD,
+                                    tooltip="Move down",
+                                    on_click=self.move_down_clicked,
+                                    icon_size=16
+                                ),
+                                ft.IconButton(
+                                    icon=ft.icons.CREATE_OUTLINED,
+                                    tooltip="Edit",
+                                    on_click=self.edit_clicked
+                                ),
+                                ft.IconButton(
+                                    icon=ft.icons.DELETE_OUTLINE,
+                                    tooltip="Delete",
+                                    on_click=self.delete_clicked
+                                ),
                             ],
                         ),
                     ],
@@ -113,3 +133,9 @@ class TaskView(ft.Column):
 
     def delete_clicked(self, e):
         self.on_delete(self.task)
+
+    def move_up_clicked(self, e):
+        self.on_move_up(self.task)
+
+    def move_down_clicked(self, e):
+        self.on_move_down(self.task)

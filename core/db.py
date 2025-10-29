@@ -23,20 +23,36 @@ class Database:
                 uuid TEXT NOT NULL UNIQUE,
                 name TEXT NOT NULL,
                 completed BOOLEAN NOT NULL,
-                created_date TEXT NOT NULL
+                created_date TEXT NOT NULL,
+                sort_order INTEGER NOT NULL DEFAULT 0
             )
         ''')
         self.conn.commit()
 
     def add_task(self, uuid, name):
         created_date = datetime.now().isoformat()
-        self.cursor.execute('INSERT INTO tasks (uuid, name, completed, created_date) VALUES (?, ?, ?, ?)',
-                            (uuid, name, False, created_date))
+        self.cursor.execute('SELECT COALESCE(MAX(sort_order), 0) FROM tasks')
+        max_order = self.cursor.fetchone()[0]
+        sort_order = max_order + 1
+
+        self.cursor.execute(
+            'INSERT INTO tasks (uuid, name, completed, created_date, sort_order) VALUES (?, ?, ?, ?, ?)',
+            (uuid, name, False, created_date, sort_order)
+        )
         self.conn.commit()
 
     def update_task(self, uuid, name, completed):
-        self.cursor.execute('UPDATE tasks SET name = ?, completed = ? WHERE uuid = ?',
-                            (name, int(completed), uuid))
+        self.cursor.execute(
+            'UPDATE tasks SET name = ?, completed = ? WHERE uuid = ?',
+            (name, int(completed), uuid)
+        )
+        self.conn.commit()
+
+    def update_task_order(self, uuid, sort_order):
+        self.cursor.execute(
+            'UPDATE tasks SET sort_order = ? WHERE uuid = ?',
+            (sort_order, uuid)
+        )
         self.conn.commit()
 
     def delete_task(self, uuid):
@@ -44,8 +60,15 @@ class Database:
         self.conn.commit()
 
     def get_all_tasks(self):
-        self.cursor.execute('SELECT uuid, name, completed, created_date FROM tasks')
+        self.cursor.execute('SELECT uuid, name, completed, created_date, sort_order FROM tasks ORDER BY sort_order')
         return self.cursor.fetchall()
+
+    def reorder_tasks(self):
+        self.cursor.execute('SELECT uuid FROM tasks ORDER BY sort_order')
+        tasks = self.cursor.fetchall()
+        for index, (uuid,) in enumerate(tasks):
+            self.cursor.execute('UPDATE tasks SET sort_order = ? WHERE uuid = ?', (index, uuid))
+        self.conn.commit()
 
     def close(self):
         self.conn.close()

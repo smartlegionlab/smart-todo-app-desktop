@@ -60,10 +60,17 @@ class TodoApp(ft.Column):
     def load_tasks(self):
         self.tasks.controls.clear()
         for row in self.db.get_all_tasks():
-            task_uuid, task_name, completed, created_date = row
+            task_uuid, task_name, completed, created_date, sort_order = row
             completed = bool(completed)
-            task = Task(task_uuid, task_name, completed, created_date)
-            task_view = TaskView(task, self.task_status_change, self.task_delete, self.task_edit)
+            task = Task(task_uuid, task_name, completed, created_date, sort_order)
+            task_view = TaskView(
+                task,
+                self.task_status_change,
+                self.task_delete,
+                self.task_edit,
+                self.task_move_up,
+                self.task_move_down
+            )
             self.tasks.controls.append(task_view)
         self.update()
 
@@ -72,8 +79,7 @@ class TodoApp(ft.Column):
             task_name = self.new_task.value
             task = Task(task_name=task_name)
             self.db.add_task(task.uuid, task_name)
-            task_view = TaskView(task, self.task_status_change, self.task_delete, self.task_edit)
-            self.tasks.controls.append(task_view)
+            self.load_tasks()
             self.new_task.value = ""
             self.new_task.focus()
             self.update()
@@ -86,6 +92,7 @@ class TodoApp(ft.Column):
         for task_view in self.tasks.controls:
             if task_view.task.uuid == task.uuid:
                 self.db.delete_task(task.uuid)
+                self.db.reorder_tasks()
                 self.tasks.controls.remove(task_view)
                 self.update()
                 break
@@ -95,6 +102,37 @@ class TodoApp(ft.Column):
         task_view.task.name = new_name
         task_view.task_text.value = new_name
         self.update()
+
+    def task_move_up(self, task):
+        self._move_task(task, -1)
+
+    def task_move_down(self, task):
+        self._move_task(task, 1)
+
+    def _move_task(self, task, direction):
+        current_index = None
+        for i, task_view in enumerate(self.tasks.controls):
+            if task_view.task.uuid == task.uuid:
+                current_index = i
+                break
+
+        if current_index is None:
+            return
+
+        if (direction == -1 and current_index == 0) or (
+                direction == 1 and current_index == len(self.tasks.controls) - 1):
+            return
+
+        swap_index = current_index + direction
+        self.tasks.controls[current_index], self.tasks.controls[swap_index] = \
+            self.tasks.controls[swap_index], self.tasks.controls[current_index]
+
+        self._update_task_orders()
+        self.update()
+
+    def _update_task_orders(self):
+        for index, task_view in enumerate(self.tasks.controls):
+            self.db.update_task_order(task_view.task.uuid, index)
 
     def tabs_changed(self, e):
         self.update()

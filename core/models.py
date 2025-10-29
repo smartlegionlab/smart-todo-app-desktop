@@ -11,8 +11,9 @@ import uuid
 
 
 class Task:
-    def __init__(self, task_uuid=None, task_name="", completed=False, created_date=None):
+    def __init__(self, task_uuid=None, task_name="", completed=False, created_date=None, sort_order=0):
         self.uuid = task_uuid or str(uuid.uuid4())
         self.name = task_name
         self.completed = completed
         self.created_date = created_date or datetime.datetime.now()
+        self.sort_order = sort_order
