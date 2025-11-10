@@ -24,20 +24,28 @@ class Database:
                 name TEXT NOT NULL,
                 completed BOOLEAN NOT NULL,
                 created_date TEXT NOT NULL,
-                sort_order INTEGER NOT NULL DEFAULT 0
+                sort_order INTEGER NOT NULL DEFAULT 0,
+                priority TEXT DEFAULT 'Medium'
             )
         ''')
         self.conn.commit()
 
-    def add_task(self, uuid, name):
+        try:
+            self.cursor.execute("ALTER TABLE tasks ADD COLUMN priority TEXT DEFAULT 'Medium'")
+            self.conn.commit()
+        except sqlite3.OperationalError:
+            # Column already exists
+            pass
+
+    def add_task(self, uuid, name, priority="Medium"):
         created_date = datetime.now().isoformat()
         self.cursor.execute('SELECT COALESCE(MAX(sort_order), 0) FROM tasks')
         max_order = self.cursor.fetchone()[0]
         sort_order = max_order + 1
 
         self.cursor.execute(
-            'INSERT INTO tasks (uuid, name, completed, created_date, sort_order) VALUES (?, ?, ?, ?, ?)',
-            (uuid, name, False, created_date, sort_order)
+            'INSERT INTO tasks (uuid, name, completed, created_date, sort_order, priority) VALUES (?, ?, ?, ?, ?, ?)',
+            (uuid, name, False, created_date, sort_order, priority)
         )
         self.conn.commit()
 
@@ -60,7 +68,7 @@ class Database:
         self.conn.commit()
 
     def get_all_tasks(self):
-        self.cursor.execute('SELECT uuid, name, completed, created_date, sort_order FROM tasks ORDER BY sort_order')
+        self.cursor.execute('SELECT uuid, name, completed, created_date, sort_order, priority FROM tasks ORDER BY sort_order')
         return self.cursor.fetchall()
 
     def reorder_tasks(self):
@@ -72,3 +80,10 @@ class Database:
 
     def close(self):
         self.conn.close()
+
+    def update_task_priority(self, uuid, priority):
+        self.cursor.execute(
+            'UPDATE tasks SET priority = ? WHERE uuid = ?',
+            (priority, uuid)
+        )
+        self.conn.commit()
