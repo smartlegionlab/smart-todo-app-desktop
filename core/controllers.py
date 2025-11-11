@@ -10,16 +10,43 @@ import flet as ft
 from core.db import Database
 from core.models import Task
 from core.views import TaskView
-
+from difflib import SequenceMatcher
 
 class TodoApp(ft.Column):
+
+    def get_priority_color(self, priority):
+        if priority == "High":
+            return ft.colors.RED_700
+        elif priority == "Medium":
+            return ft.colors.ORANGE_600
+        elif priority == "Low":
+            return ft.colors.YELLOW_600
+        return ft.colors.WHITE
+
+    def filter_by_priority(self, e):
+        self.selected_priority = e.control.value
+        self.update()
+
     def __init__(self):
         super().__init__()
         self.db = Database()
         self.new_task = ft.TextField(hint_text="What needs to be done?", on_submit=self.add_clicked, expand=True)
+        self.priority_dropdown = ft.Dropdown(options=[ft.dropdown.Option("Low"),ft.dropdown.Option("Medium"),ft.dropdown.Option("High"),],value="Medium",width=120)
         self.tasks = ft.Column()
         self.items_left = ft.Text("0 items left")
+        self.progress_bar = ft.ProgressBar(value=0, width=300, color=ft.colors.GREEN_400)
         self.filter = self.create_filter()
+
+        self.sort_dropdown = ft.Dropdown(
+            options=[
+                ft.dropdown.Option("Default"),
+                ft.dropdown.Option("Priority"),
+                ft.dropdown.Option("Date"),
+            ],
+            value="Default",
+            on_change=self.sort_tasks,
+            width=150,
+        )
 
         self.controls = [
             ft.Row(
@@ -29,25 +56,49 @@ class TodoApp(ft.Column):
             ft.Row(
                 controls=[
                     self.new_task,
+                    self.priority_dropdown,
                     ft.FloatingActionButton(icon=ft.icons.ADD, on_click=self.add_clicked),
                 ],
+                spacing=10,
+            ),
+            ft.Row(
+                controls=[
+                    ft.Dropdown(
+                        options=[ft.dropdown.Option("All"), ft.dropdown.Option("Low"), ft.dropdown.Option("Medium"),
+                                 ft.dropdown.Option("High")],
+                        value="All",
+                        width=120,
+                        on_change=self.filter_by_priority,
+                    ),
+                    self.sort_dropdown,
+                ],
+                spacing=20,
+                alignment=ft.MainAxisAlignment.START,
             ),
             ft.Column(
                 spacing=25,
                 controls=[
                     self.filter,
                     self.tasks,
-                    ft.Row(
-                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ft.Column(
+                        spacing=5,
                         controls=[
-                            self.items_left,
-                            ft.OutlinedButton(text="Clear completed", on_click=self.clear_clicked),
+                            ft.Row(
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                                controls=[
+                                    self.items_left,
+                                    ft.OutlinedButton(text="Clear completed", on_click=self.clear_clicked),
+                                ],
+                            ),
+                            self.progress_bar,
                         ],
                     ),
                 ],
             ),
         ]
+
+        self.selected_priority = "All"
 
     def create_filter(self):
         return ft.Tabs(
@@ -60,10 +111,23 @@ class TodoApp(ft.Column):
     def load_tasks(self):
         self.tasks.controls.clear()
         tasks_data = self.db.get_all_tasks()
+
+        icon_map = {
+            "High": ft.icons.PRIORITY_HIGH,
+            "Medium": ft.icons.FLAG,
+            "Low": ft.icons.LABEL,
+        }
+
         for row in tasks_data:
-            task_uuid, task_name, completed, created_date, sort_order = row
+            if len(row) == 6:
+                task_uuid, task_name, completed, created_date, sort_order, priority = row
+            else:
+                task_uuid, task_name, completed, created_date, sort_order = row
+                priority = "Medium"
+
             completed = bool(completed)
-            task = Task(task_uuid, task_name, completed, created_date, sort_order)
+            task = Task(task_uuid, task_name, completed, created_date, sort_order, priority)
+
             task_view = TaskView(
                 task,
                 self.task_status_change,
@@ -72,14 +136,39 @@ class TodoApp(ft.Column):
                 self.task_move_up,
                 self.task_move_down
             )
+
+            # Style text
+            task_view.task_text.color = self.get_priority_color(task.priority)
+            task_view.task_text.weight = ft.FontWeight.BOLD
+            task_view.task_text.size = 20
+
+
+            priority_icon = ft.Icon(
+                name=icon_map.get(task.priority, ft.icons.LABEL),
+                color=self.get_priority_color(task.priority),
+                size=20,
+            )
+
+
+            if hasattr(task_view, "controls") and isinstance(task_view.controls, list):
+                task_view.controls.insert(0, priority_icon)
+
+
+            task_view.animate_opacity = ft.animation.Animation(300, "easeInOut")
+            task_view.opacity = 0
             self.tasks.controls.append(task_view)
+            self.update()
+            task_view.opacity = 1
+            self.update()
+
         self.update()
 
     def add_clicked(self, e):
         if self.new_task.value:
             task_name = self.new_task.value
-            task = Task(task_name=task_name)
-            self.db.add_task(task.uuid, task_name)
+            priority = self.priority_dropdown.value
+            task = Task(task_name=task_name, priority=priority)
+            self.db.add_task(task.uuid, task_name, priority)
             self.load_tasks()
             self.new_task.value = ""
             self.new_task.focus()
@@ -148,14 +237,52 @@ class TodoApp(ft.Column):
         status = self.filter.tabs[self.filter.selected_index].text
         count = 0
         for task_view in self.tasks.controls:
+            # Filter by tab
             if status == "all":
-                task_view.visible = True
+                visible = True
             elif status == "active":
-                task_view.visible = not task_view.task.completed
+                visible = not task_view.task.completed
             elif status == "completed":
-                task_view.visible = task_view.task.completed
+                visible = task_view.task.completed
+
+            # Filter by priority
+            if self.selected_priority != "All":
+                visible = visible and (task_view.task.priority == self.selected_priority)
+
+            task_view.visible = visible
 
             if not task_view.task.completed:
                 count += 1
 
         self.items_left.value = f"{count} active task(s) left"
+        total = len(self.tasks.controls)
+        completed = total - count
+        self.progress_bar.value = completed / total if total > 0 else 0
+        progress = completed / total if total > 0 else 0
+        self.progress_bar.value = progress
+
+        if progress == 1:
+            self.progress_bar.color = ft.colors.GREEN_600
+        elif progress >= 0.5:
+            self.progress_bar.color = ft.colors.AMBER_400
+        else:
+            self.progress_bar.color = ft.colors.RED_400
+
+    def sort_tasks(self, e):
+        sort_type = self.sort_dropdown.value
+        if sort_type == "Priority":
+            # High first, then Medium, then Low
+            priority_order = {"High": 3, "Medium": 2, "Low": 1}
+            self.tasks.controls.sort(
+                key=lambda t: priority_order.get(t.task.priority, 0), reverse=True
+            )
+        elif sort_type == "Date":
+            self.tasks.controls.sort(
+                key=lambda t: t.task.created_date, reverse=True
+            )
+        else:
+            # Default = sort_order
+            self.tasks.controls.sort(key=lambda t: t.task.sort_order)
+
+        self.update()
+
