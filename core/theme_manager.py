@@ -15,8 +15,8 @@ class ThemeManager:
                 with open(SETTINGS_FILE, "r") as f:
                     data = json.load(f)
                     self.theme = data.get("theme", "dark")
-            except Exception:
-                pass
+            except Exception as e:
+                print(e)
 
     def save(self):
         os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)

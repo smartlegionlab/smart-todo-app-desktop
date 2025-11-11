@@ -10,7 +10,7 @@ import flet as ft
 from core.db import Database
 from core.models import Task
 from core.views import TaskView
-from difflib import SequenceMatcher
+
 
 class TodoApp(ft.Column):
 
@@ -137,7 +137,6 @@ class TodoApp(ft.Column):
                 self.task_move_down
             )
 
-            # Style text
             task_view.task_text.color = self.get_priority_color(task.priority)
             task_view.task_text.weight = ft.FontWeight.BOLD
             task_view.task_text.size = 20
@@ -154,7 +153,7 @@ class TodoApp(ft.Column):
                 task_view.controls.insert(0, priority_icon)
 
 
-            task_view.animate_opacity = ft.animation.Animation(300, "easeInOut")
+            task_view.animate_opacity = 300
             task_view.opacity = 0
             self.tasks.controls.append(task_view)
             self.update()
@@ -237,15 +236,12 @@ class TodoApp(ft.Column):
         status = self.filter.tabs[self.filter.selected_index].text
         count = 0
         for task_view in self.tasks.controls:
-            # Filter by tab
-            if status == "all":
-                visible = True
-            elif status == "active":
+            visible = True
+            if status == "active":
                 visible = not task_view.task.completed
             elif status == "completed":
                 visible = task_view.task.completed
 
-            # Filter by priority
             if self.selected_priority != "All":
                 visible = visible and (task_view.task.priority == self.selected_priority)
 
@@ -271,7 +267,6 @@ class TodoApp(ft.Column):
     def sort_tasks(self, e):
         sort_type = self.sort_dropdown.value
         if sort_type == "Priority":
-            # High first, then Medium, then Low
             priority_order = {"High": 3, "Medium": 2, "Low": 1}
             self.tasks.controls.sort(
                 key=lambda t: priority_order.get(t.task.priority, 0), reverse=True
@@ -281,8 +276,6 @@ class TodoApp(ft.Column):
                 key=lambda t: t.task.created_date, reverse=True
             )
         else:
-            # Default = sort_order
             self.tasks.controls.sort(key=lambda t: t.task.sort_order)
 
         self.update()
-

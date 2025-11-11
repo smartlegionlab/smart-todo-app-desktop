@@ -19,8 +19,6 @@ class Task:
         self.sort_order = sort_order
         self.priority = priority
 
-        # Optional helper: to make saving/loading to JSON or database easier
-
     def to_dict(self):
         return {
             "uuid": self.uuid,
@@ -28,7 +26,7 @@ class Task:
             "completed": self.completed,
             "created_date": self.created_date.isoformat(),
             "sort_order": self.sort_order,
-            "priority": self.priority,  # include priority
+            "priority": self.priority,
         }
 
     @staticmethod
@@ -41,5 +39,5 @@ class Task:
             if "created_date" in data
             else None,
             sort_order=data.get("sort_order", 0),
-            priority=data.get("priority", "Medium"),  # default if missing
+            priority=data.get("priority", "Medium"),
         )
