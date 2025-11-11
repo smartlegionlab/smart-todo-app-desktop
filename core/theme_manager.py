@@ -1,27 +1,16 @@
-import json
-import os
-
-SETTINGS_FILE = "data/settings.json"
+from core.db import Database
 
 
 class ThemeManager:
     def __init__(self):
-        self.theme = "dark"
-        self.load()
+        self.db = Database()
+        self.theme = self.load()
 
     def load(self):
-        if os.path.exists(SETTINGS_FILE):
-            try:
-                with open(SETTINGS_FILE, "r") as f:
-                    data = json.load(f)
-                    self.theme = data.get("theme", "dark")
-            except Exception as e:
-                print(e)
+        return self.db.get_setting('theme', 'dark')
 
     def save(self):
-        os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
-        with open(SETTINGS_FILE, "w") as f:
-            json.dump({"theme": self.theme}, f)
+        self.db.set_setting('theme', self.theme)
 
     def toggle(self):
         self.theme = "light" if self.theme == "dark" else "dark"

@@ -15,6 +15,7 @@ class Database:
         self.conn = sqlite3.connect(db_name)
         self.cursor = self.conn.cursor()
         self.create_table()
+        self.create_settings_table()
 
     def create_table(self):
         self.cursor.execute('''
@@ -34,8 +35,16 @@ class Database:
             self.cursor.execute("ALTER TABLE tasks ADD COLUMN priority TEXT DEFAULT 'Medium'")
             self.conn.commit()
         except sqlite3.OperationalError:
-            # Column already exists
             pass
+
+    def create_settings_table(self):
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+        ''')
+        self.conn.commit()
 
     def add_task(self, uuid, name, priority="Medium"):
         created_date = datetime.now().isoformat()
@@ -76,6 +85,18 @@ class Database:
         tasks = self.cursor.fetchall()
         for index, (uuid,) in enumerate(tasks):
             self.cursor.execute('UPDATE tasks SET sort_order = ? WHERE uuid = ?', (index, uuid))
+        self.conn.commit()
+
+    def get_setting(self, key, default=None):
+        self.cursor.execute('SELECT value FROM settings WHERE key = ?', (key,))
+        result = self.cursor.fetchone()
+        return result[0] if result else default
+
+    def set_setting(self, key, value):
+        self.cursor.execute(
+            'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)',
+            (key, value)
+        )
         self.conn.commit()
 
     def close(self):
